@@ -56,30 +56,37 @@ if (count($_POST)) {
 		$errorMessage = sprintf(Flux::message('NewPasswordNeedSymbol'), $passwordMinSymbol);
 	}
 	else {
-		$sql = "SELECT user_pass AS currentPassword FROM {$server->loginDatabase}.login WHERE account_id = ?";
+		$passwordCodec = $server->loginServer->password;
+		$passwordTypeColumn = $passwordCodec->usesArgon2id() ? 'passwd_type' : '0 AS passwd_type';
+		$sql = "SELECT user_pass, $passwordTypeColumn FROM {$server->loginDatabase}.login WHERE account_id = ?";
 		$sth = $server->connection->getStatement($sql);
 		$sth->execute(array($session->account->account_id));
+		$account = $sth->fetch();
 		
-		$account         = $sth->fetch();
-		$useMD5          = $session->loginServer->config->getUseMD5();
-		$currentPassword = $useMD5 ? Flux::hashPassword($currentPassword) : $currentPassword;
-		$newPassword     = $useMD5 ? Flux::hashPassword($newPassword) : $newPassword;
-		
-		if ($currentPassword != $account->currentPassword) {
+		if (!$account || !$passwordCodec->verify($currentPassword, $account->user_pass, $account->passwd_type)) {
 			$errorMessage = Flux::message('OldPasswordInvalid');
 		}
 		else {
-			$sql = "UPDATE {$server->loginDatabase}.login SET user_pass = ? WHERE account_id = ?";
+			list($newPasswordHash, $newPasswordType) = $passwordCodec->hash($newPassword);
+			if ($passwordCodec->usesArgon2id()) {
+				$sql = "UPDATE {$server->loginDatabase}.login SET user_pass = ?, passwd_type = ? WHERE account_id = ?";
+				$bind = array($newPasswordHash, $newPasswordType, $session->account->account_id);
+			}
+			else {
+				$sql = "UPDATE {$server->loginDatabase}.login SET user_pass = ? WHERE account_id = ?";
+				$bind = array($newPasswordHash, $session->account->account_id);
+			}
 			$sth = $server->connection->getStatement($sql);
 			
-			if ($sth->execute(array($newPassword, $session->account->account_id))) {
+			if ($sth->execute($bind)) {
 				$pwChangeTable = Flux::config('FluxTables.ChangePasswordTable');
 				
 				$sql  = "INSERT INTO {$server->loginDatabase}.$pwChangeTable ";
 				$sql .= "(account_id, old_password, new_password, change_ip, change_date) ";
 				$sql .= "VALUES (?, ?, ?, ?, NOW())";
 				$sth  = $server->connection->getStatement($sql);
-				$sth->execute(array($session->account->account_id, $currentPassword, $newPassword, $_SERVER['REMOTE_ADDR']));
+				$auditValue = $passwordCodec->auditValue();
+				$sth->execute(array($session->account->account_id, $auditValue, $auditValue, $_SERVER['REMOTE_ADDR']));
 				
 				$session->setMessageData(Flux::message('PasswordHasBeenChanged'));
 				$session->logout();

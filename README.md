@@ -40,6 +40,7 @@ How To ... ?
 We have a small doc library that covers:
 * Basic User Documentation
     - Installation
+    - [rAthena Argon2id password compatibility](doc/passwords.md)
     - [Themes](https://github.com/rathena/FluxCP/blob/master/doc/user_theme.md)
     - [Languages](https://github.com/rathena/FluxCP/blob/master/doc/user_lang.md)
     - Installing Addons

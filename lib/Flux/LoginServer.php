@@ -1,6 +1,7 @@
 <?php
 require_once 'Flux/BaseServer.php';
 require_once 'Flux/RegisterError.php';
+require_once 'Flux/Password.php';
 
 /**
  * Represents an rAthena Login Server.
@@ -37,6 +38,14 @@ class Flux_LoginServer extends Flux_BaseServer {
 	 * @var string
 	 */
 	public $webDatabase;
+
+	/**
+	 * rAthena-compatible password codec.
+	 *
+	 * @access public
+	 * @var Flux_Password
+	 */
+	public $password;
 	
 	/**
 	 * Overridden to add custom properties.
@@ -47,6 +56,7 @@ class Flux_LoginServer extends Flux_BaseServer {
 	{
 		parent::__construct($config);
 		$this->loginDatabase = $config->getDatabase();
+		$this->password      = new Flux_Password($config);
 	}
 	
 	/**
@@ -75,33 +85,37 @@ class Flux_LoginServer extends Flux_BaseServer {
 	 */
 	public function isAuth($username, $password)
 	{
-		
 		if (trim($username) == '' || trim($password) == '') {
 			return false;
 		}
 
-     	if ($this->config->get('UseMD5')) {
-			$password = Flux::hashPassword($password);
-		}
-        
-		$sql  = "SELECT userid FROM {$this->loginDatabase}.login WHERE sex != 'S' AND group_id >= 0 ";
+		$passwordTypeColumn = $this->password->usesArgon2id() ? 'passwd_type' : '0 AS passwd_type';
+		$sql  = "SELECT account_id, user_pass, $passwordTypeColumn FROM {$this->loginDatabase}.login WHERE sex != 'S' AND group_id >= 0 ";
 		if ($this->config->getNoCase()) {
 			$sql .= 'AND LOWER(userid) = LOWER(?) ';
 		}
 		else {
 			$sql .= 'AND CAST(userid AS BINARY) = ? ';
 		}
-		$sql .= "AND user_pass = ? LIMIT 1";
+		$sql .= 'LIMIT 1';
 		$sth  = $this->connection->getStatement($sql);
-		$sth->execute(array($username, $password));
-		
-		$res = $sth->fetch();
-		if ($res) {
-			return true;
-		}
-		else {
+		$sth->execute(array($username));
+
+		$account = $sth->fetch();
+		if (!$account || !$this->password->verify($password, $account->user_pass, $account->passwd_type)) {
 			return false;
 		}
+
+		// A successful control-panel login has the cleartext available, so it is
+		// a safe opportunity to migrate legacy hashes and current pepper/mode.
+		if ($this->password->needsRehash($account->user_pass, $account->passwd_type)) {
+			list($hash, $type) = $this->password->hash($password);
+			$sql = "UPDATE {$this->loginDatabase}.login SET user_pass = ?, passwd_type = ? WHERE account_id = ?";
+			$update = $this->connection->getStatement($sql);
+			$update->execute(array($hash, $type, $account->account_id));
+		}
+
+		return true;
 	}
 	
 	/**
@@ -199,13 +213,18 @@ class Flux_LoginServer extends Flux_BaseServer {
 			}
 		}
 		
-		if ($this->config->getUseMD5()) {
-			$password = Flux::hashPassword($password);
+		list($passwordHash, $passwordType) = $this->password->hash($password);
+		$birthdate = date('Y-m-d', $birthdatestamp);
+		if ($this->password->usesArgon2id()) {
+			$sql = "INSERT INTO {$this->loginDatabase}.login (userid, user_pass, passwd_type, email, sex, group_id, birthdate) VALUES (?, ?, ?, ?, ?, ?, ?)";
+			$bind = array($username, $passwordHash, $passwordType, $email, $gender, (int)$this->config->getGroupID(), $birthdate);
 		}
-		
-		$sql = "INSERT INTO {$this->loginDatabase}.login (userid, user_pass, email, sex, group_id, birthdate) VALUES (?, ?, ?, ?, ?, ?)";
+		else {
+			$sql = "INSERT INTO {$this->loginDatabase}.login (userid, user_pass, email, sex, group_id, birthdate) VALUES (?, ?, ?, ?, ?, ?)";
+			$bind = array($username, $passwordHash, $email, $gender, (int)$this->config->getGroupID(), $birthdate);
+		}
 		$sth = $this->connection->getStatement($sql);
-		$res = $sth->execute(array($username, $password, $email, $gender, (int)$this->config->getGroupID(), date('Y-m-d', $birthdatestamp)));
+		$res = $sth->execute($bind);
 		
 		if ($res) {
 			$idsth = $this->connection->getStatement("SELECT LAST_INSERT_ID() AS account_id");
@@ -218,7 +237,7 @@ class Flux_LoginServer extends Flux_BaseServer {
 			$sql .= "VALUES (?, ?, ?, ?, ?, NOW(), ?, 1)";
 			$sth  = $this->connection->getStatement($sql);
 			
-			$sth->execute(array($idres->account_id, $username, $password, $gender, $email, $_SERVER['REMOTE_ADDR']));
+			$sth->execute(array($idres->account_id, $username, $this->password->auditValue(), $gender, $email, $_SERVER['REMOTE_ADDR']));
 			return $idres->account_id;
 		}
 		else {

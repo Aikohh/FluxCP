@@ -284,6 +284,8 @@ return array(
 	'ResetPwFailed'           => 'Failed to re-set password, please try again later.',
 	'ResetPwDone'             => 'Your password has been reset and an e-mail containing your new password has been sent to you.',
 	'ResetPwDone2'            => 'Your password has been reset, but we failed to deliver the e-mail containing your new password.  Please reset again to resolve this issue.',
+	'ResetPwEnrollDone'       => 'Recovery is active. Check your e-mail, then immediately use the game client to log in with the new password you want to keep.',
+	'ResetPwEnrollDone2'      => 'Recovery is active, but its instruction e-mail could not be delivered. Immediately use the game client to log in with the new password you want to keep, or contact an administrator.',
 	// - account/transfer
 	'TransferTitle'           => 'Transfer Donation Credits',
 	'TransferGreaterThanOne'  => 'You can only transfer credits in amounts greater than 1.',

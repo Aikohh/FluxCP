@@ -12,9 +12,10 @@ if (Flux::config('AutoRemoveTempBans')) {
 }
 
 $useMD5         = $server->loginServer->config->get('UseMD5');
+$useArgon2id    = $server->loginServer->config->get('UseArgon2id');
 $searchMD5      = Flux::config('AllowMD5PasswordSearch') && Flux::config('ReallyAllowMD5PasswordSearch') && $auth->allowedToSearchMD5Passwords;
-$searchPassword = (($useMD5 && $searchMD5) || !$useMD5) && $auth->allowedToSeeAccountPassword;
-$showPassword   = !$useMD5 && $auth->allowedToSeeAccountPassword;
+$searchPassword = !$useArgon2id && (($useMD5 && $searchMD5) || !$useMD5) && $auth->allowedToSeeAccountPassword;
+$showPassword   = !$useArgon2id && !$useMD5 && $auth->allowedToSeeAccountPassword;
 $bind           = array();
 $creditsTable   = Flux::config('FluxTables.CreditsTable');
 $creditColumns  = 'credits.balance, credits.last_donation_date, credits.last_donation_amount';

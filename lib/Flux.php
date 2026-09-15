@@ -396,6 +396,10 @@ class Flux {
 
 			$loginServer->setDatabase($dbConfig->getDatabase(), $options);
 			$loginServer->setUseMD5(true, $options);
+			$loginServer->setUseArgon2id(false, $options);
+			$loginServer->setPasswordHashPepper('', $options);
+			$loginServer->setPasswordWirePepper('', $options);
+			$loginServer->setUsePasswordEnrollment(false, $options);
 
 			// Raise error if missing essential configuration directives.
 			if (!$loginServer->getAddress()) {

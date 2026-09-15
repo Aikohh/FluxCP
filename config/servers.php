@@ -53,7 +53,11 @@ return array(
 		'LoginServer'    => array(
 			'Address'  => '127.0.0.1',
 			'Port'     => 6900,
-			'UseMD5'   => false,
+			'UseMD5'   => false, // Legacy storage only; ignored when UseArgon2id is enabled.
+			'UseArgon2id' => false, // Requires the matching rAthena passwd_type schema and PHP Argon2id support.
+			'PasswordHashPepper' => '', // Must exactly match rAthena password_hash_pepper. Keep this secret.
+			'PasswordWirePepper' => '', // Must exactly match rAthena password_pepper; maximum 20 bytes.
+			'UsePasswordEnrollment' => false, // E-mail recovery activates rAthena's next-game-login enrollment.
 			'NoCase'   => true, // rA account case-sensitivity; Default: Case-INsensitive (true).
 			'GroupID'  => 0,    // Default account group ID during registration.
 			//'Database' => 'ragnarok'
