@@ -269,10 +269,6 @@ return array(
 			'ServiceDeskLabel'	=> array('module' => 'servicedesk'),
 			'LogoutTitle'		=> array('module' => 'account', 'action' => 'logout'),
 		),
-		'DonationsLabel'		=> array(
-			'PurchaseLabel'		=> array('module' => 'purchase'),
-			'DonateLabel'		=> array('module' => 'donate'),
-		),
 		'InformationLabel'	=> array(
 			'ServerInfoLabel'	=> array('module' => 'server', 'action' => 'info'),
 			'ServerStatusLabel'	=> array('module' => 'server', 'action' => 'status'),
@@ -287,10 +283,6 @@ return array(
 		'DatabaseLabel'		=> array(
 			'ItemDatabaseLabel'	=> array('module' => 'item'),
 			'MobDatabaseLabel'	=> array('module' => 'monster'),
-		),
-		'SocialLabel'		=> array(
-			'JoinUsInFacebookLabel'	=> array('exturl' => 'https://www.facebook.com/<change_me>'),
-			'RateUsOnRMSLabel'		=> array('exturl' => '<link_to_RMS>'),
 		),
 		'Service Desk'	=> array(
 			'ServiceDeskLabel'	=> array('module' => 'servicedesk', 'action' => 'staffindex'),
@@ -367,18 +359,6 @@ return array(
 			'changemail'	=> 'E-mail Changes',
 			'ban'			=> 'Account Bans',
 			'ipban'			=> 'IP Bans'
-		),
-		'purchase'		=> array(
-			'index'			=> 'Shop',
-			'cart'			=> 'Go to Cart',
-			'checkout'		=> 'Checkout',
-			'clear'			=> 'Empty Cart',
-			'pending'		=> 'Pending Redemption'
-		),
-		'donate'		=> array(
-			'index'			=> 'Make a Donation',
-			'history'		=> 'Donation History',
-			'trusted'		=> 'Trusted PayPal E-mails'
 		),
 		'ipban'			=> array(
 			'index'			=> 'IP Ban List',

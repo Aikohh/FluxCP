@@ -10,21 +10,10 @@ return array(
 			'*'        => AccountLevel::ANYONE
 		),
 		'donate'    => array(
-			'index'    => AccountLevel::ANYONE,
-			'notify'   => AccountLevel::ANYONE,
-			'update'   => AccountLevel::ANYONE,
-			'complete' => AccountLevel::ANYONE,
-			'history'  => AccountLevel::NORMAL,
-			'trusted'  => AccountLevel::NORMAL
+			'*'        => AccountLevel::NOONE
 		),
 		'purchase'  => array(
-			'index'    => AccountLevel::ANYONE,
-			'add'      => AccountLevel::ANYONE,
-			'clear'    => AccountLevel::NORMAL,
-			'cart'     => AccountLevel::NORMAL,
-			'checkout' => AccountLevel::NORMAL,
-			'remove'   => AccountLevel::NORMAL,
-			'pending'  => AccountLevel::NORMAL
+			'*'        => AccountLevel::NOONE
 		),
 		'itemshop'  => array(
 			'add'      => AccountLevel::ADMIN,
