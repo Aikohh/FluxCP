@@ -15,9 +15,6 @@
 		<input type="text" name="password" id="password" value="<?php echo htmlspecialchars($params->get('password') ?: '') ?>" />
 		<?php endif ?>
 		...
-		<label for="email"><?php echo htmlspecialchars(Flux::message('EmailAddressLabel')) ?>:</label>
-		<input type="text" name="email" id="email" value="<?php echo htmlspecialchars($params->get('email') ?: '') ?>" />
-		...
 		<label for="last_ip"><?php echo htmlspecialchars(Flux::message('LastUsedIpLabel')) ?>:</label>
 		<input type="text" name="last_ip" id="last_ip" value="<?php echo htmlspecialchars($params->get('last_ip') ?: '') ?>" />
 		...
@@ -93,7 +90,6 @@
 		<th><?php echo $paginator->sortableColumn('group_id', Flux::message('AccountGroupIDLabel')) ?></th>
 		<th><?php echo $paginator->sortableColumn('state', Flux::message('AccountStateLabel')) ?></th>
 		<th><?php echo $paginator->sortableColumn('balance', Flux::message('CreditBalanceLabel')) ?></th>
-		<th><?php echo $paginator->sortableColumn('login.email', Flux::message('EmailAddressLabel')) ?></th>
 		<th><?php echo $paginator->sortableColumn('logincount', Flux::message('LoginCountLabel')) ?></th>
 		<th><?php echo $paginator->sortableColumn('birthdate', Flux::message('AccountBirthdateLabel')) ?></th>
 		<th><?php echo $paginator->sortableColumn('lastlogin', Flux::message('LastLoginDateLabel')) ?></th>
@@ -135,13 +131,6 @@
 			<?php endif ?>
 		</td>
 		<td><?php echo number_format((int)$account->balance) ?></td>
-		<td>
-			<?php if ($account->email): ?>
-				<?php echo $this->linkToAccountSearch(array('email' => $account->email), $account->email) ?>
-			<?php else: ?>
-				<span class="not-applicable"><?php echo htmlspecialchars(Flux::message('NoneLabel')) ?></span>
-			<?php endif ?>
-		</td>
 		<td><?php echo number_format((int)$account->logincount) ?></td>
 		<td><?php echo $account->birthdate ?></td>
 		<td>

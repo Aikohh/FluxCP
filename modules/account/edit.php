@@ -37,7 +37,6 @@ if ($account) {
 	if (count($_POST)) {
 		$groups     = AccountLevel::getArray();
 	
-		$email      = trim($params->get('email'));
 		$gender     = trim($params->get('gender'));
 		$loginCount = (int)$params->get('logincount');
 		$birthdate  = $params->get('birthdate_date');
@@ -72,7 +71,6 @@ if ($account) {
 		}
 		else {
 			$bind = array(
-				'email'      => $email,
 				'sex'        => $gender,
 				'logincount' => $loginCount,
 				'birthdate'  => $birthdate ? $birthdate : $account->birthdate,
@@ -80,7 +78,7 @@ if ($account) {
 				'last_ip'    => $lastIP,
 			);
 			
-			$sql  = "UPDATE {$server->loginDatabase}.login SET email = :email, ";
+			$sql  = "UPDATE {$server->loginDatabase}.login SET ";
 			$sql .= "sex = :sex, logincount = :logincount, birthdate = :birthdate, lastlogin = :lastlogin, last_ip = :last_ip";
 			
 			if ($auth->allowedToEditAccountGroupID) {

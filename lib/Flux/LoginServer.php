@@ -121,8 +121,12 @@ class Flux_LoginServer extends Flux_BaseServer {
 	/**
 	 *
 	 */
-	public function register($username, $password, $confirmPassword, $email,$email2, $gender, $birthdate, $securityCode)
+	public function register($username, $password, $confirmPassword, $gender, $birthdate, $securityCode)
 	{
+		// rAthena requires a non-empty database value, but Raisupati does not
+		// collect or use player e-mail addresses.
+		$email = 'a@a.com';
+
 		if (preg_match('/[^' . Flux::config('UsernameAllowedChars') . ']/', $username)) {
 			throw new Flux_RegisterError('Invalid character(s) used in username', Flux_RegisterError::INVALID_USERNAME);
 		}
@@ -159,12 +163,6 @@ class Flux_LoginServer extends Flux_BaseServer {
 		elseif (Flux::config('PasswordMinSymbol') > 0 && preg_match_all('/[^A-Za-z0-9]/', $password, $matches) < Flux::config('PasswordMinSymbol')) {
 			throw new Flux_RegisterError('Passwords must contain at least ' . intval(Flux::config('PasswordMinSymbol')) . ' symbol(s)', Flux_RegisterError::PASSWORD_NEED_SYMBOL);
 		}
-		elseif (!preg_match('/^(.+?)@(.+?)$/', $email)) {
-			throw new Flux_RegisterError('Invalid e-mail address', Flux_RegisterError::INVALID_EMAIL_ADDRESS);
-		}
-		elseif ($email!==$email2) {
-			throw new Flux_RegisterError('Email do not match', Flux_RegisterError::INVALID_EMAIL_CONF);
-		}		
 		elseif (!in_array(strtoupper($gender), array('M', 'F'))) {
 			throw new Flux_RegisterError('Invalid gender', Flux_RegisterError::INVALID_GENDER);
 		}
@@ -200,17 +198,6 @@ class Flux_LoginServer extends Flux_BaseServer {
 		$res = $sth->fetch();
 		if ($res) {
 			throw new Flux_RegisterError('Username is already taken', Flux_RegisterError::USERNAME_ALREADY_TAKEN);
-		}
-		
-		if (!Flux::config('AllowDuplicateEmails')) {
-			$sql = "SELECT email FROM {$this->loginDatabase}.login WHERE email = ? LIMIT 1";
-			$sth = $this->connection->getStatement($sql);
-			$sth->execute(array($email));
-
-			$res = $sth->fetch();
-			if ($res) {
-				throw new Flux_RegisterError('E-mail address is already in use', Flux_RegisterError::EMAIL_ADDRESS_IN_USE);
-			}
 		}
 		
 		list($passwordHash, $passwordType) = $this->password->hash($password);

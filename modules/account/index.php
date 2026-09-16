@@ -38,7 +38,6 @@ else {
 	$opValues         = array_keys($opMapping);
 	$username         = $params->get('username');
 	$password         = $params->get('password');
-	$email            = $params->get('email');
 	$lastIP           = $params->get('last_ip');
 	$gender           = $params->get('gender');
 	$accountState     = $params->get('account_state');
@@ -69,12 +68,6 @@ else {
 			$bind[]      = "%$password%";
 			$bind[]      = $password;
 		}
-	}
-	
-	if ($email) {
-		$sqlpartial .= "AND (login.email LIKE ? OR login.email = ?) ";
-		$bind[]      = "%$email%";
-		$bind[]      = $email;
 	}
 	
 	if ($lastIP) {
@@ -155,7 +148,7 @@ $paginator = $this->getPaginator($sth->fetch()->total);
 $paginator->setSortableColumns(array(
 	'login.account_id' => 'asc', 'login.userid', 'login.user_pass',
 	'login.sex', 'group_id', 'state', 'balance',
-	'login.email', 'logincount', 'lastlogin', 'last_ip',
+	'logincount', 'lastlogin', 'last_ip',
 	'reg_date'
 ));
 

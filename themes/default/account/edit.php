@@ -13,14 +13,12 @@
 				<td><?php echo $account->account_id ?></td>
 			</tr>
 			<tr>
-				<th><label for="email"><?php echo htmlspecialchars(Flux::message('EmailAddressLabel')) ?></label></th>
-				<td><input type="text" name="email" id="email" value="<?php echo htmlspecialchars($account->email) ?>" /></td>
 				<?php if ($auth->allowedToEditAccountGroupID && !$isMine): ?>
 					<th><label for="group_id"><?php echo htmlspecialchars(Flux::message('AccountGroupIDLabel')) ?></label></th>
-					<td><input type="text" name="group_id" id="group_id" value="<?php echo (int)$account->group_id ?>" /></td>
+					<td colspan="3"><input type="text" name="group_id" id="group_id" value="<?php echo (int)$account->group_id ?>" /></td>
 				<?php else: ?>
 					<th><?php echo htmlspecialchars(Flux::message('AccountGroupIDLabel')) ?></th>
-					<td>
+					<td colspan="3">
 						<input type="hidden" name="group_id" value="<?php echo (int)$account->group_id ?>" />
 						<?php echo number_format((int)$account->group_id) ?>
 					</td>

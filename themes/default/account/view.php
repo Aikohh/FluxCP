@@ -21,20 +21,8 @@
 		</td>
 	</tr>
 	<tr>
-		<th><?php echo htmlspecialchars(Flux::message('EmailAddressLabel')) ?></th>
-		<td>
-			<?php if ($account->email): ?>
-				<?php if ($auth->actionAllowed('account', 'index')): ?>
-					<?php echo $this->linkToAccountSearch(array('email' => $account->email), $account->email) ?>
-				<?php else: ?>
-					<?php echo htmlspecialchars($account->email) ?>
-				<?php endif ?>
-			<?php else: ?>
-				<span class="not-applicable"><?php echo htmlspecialchars(Flux::message('NoneLabel')) ?></span>
-			<?php endif ?>
-		</td>
 		<th><?php echo htmlspecialchars(Flux::message('AccountGroupIDLabel')) ?></th>
-		<td><?php echo (int)$account->group_id ?></td>
+		<td colspan="3"><?php echo (int)$account->group_id ?></td>
 	</tr>
 	<tr>
 		<th><?php echo htmlspecialchars(Flux::message('GenderLabel')) ?></th>

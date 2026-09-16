@@ -10,7 +10,7 @@ $xferTable = Flux::config('FluxTables.CreditTransferTable');
 $col  = "from_account_id, target_account_id, amount, transfer_date, ";
 $col .= "fa.userid AS from_userid, ta.userid AS target_userid, ";
 $col .= "ch.char_id AS target_char_id, ch.name AS target_char_name, ";
-$col .= "fa.email AS from_email";
+$col .= "fa.userid AS from_userid";
 
 $sql  = "SELECT $col FROM {$server->charMapDatabase}.$xferTable ";
 $sql .= "LEFT OUTER JOIN {$server->loginDatabase}.login AS fa ON $xferTable.from_account_id = fa.account_id ";

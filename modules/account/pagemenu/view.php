@@ -5,8 +5,12 @@
 $groups  = AccountLevel::getArray();
 
 $pageMenu = array();
-if ((AccountLevel::getGroupLevel($account->group_id) <= $session->account->group_level || $auth->allowedToEditHigherPower) && $auth->actionAllowed('account', 'edit')) {
+$canManageAccount = AccountLevel::getGroupLevel($account->group_id) <= $session->account->group_level || $auth->allowedToEditHigherPower;
+if ($canManageAccount && $auth->actionAllowed('account', 'edit')) {
 	$pageMenu[Flux::message('ModifyAccountLink')] = $this->url('account', 'edit', array('id' => $account->account_id));
+}
+if ($canManageAccount && $server->loginServer->password->usesPasswordEnrollment() && $auth->actionAllowed('account', 'enrollpass')) {
+	$pageMenu['Password Recovery'] = $this->url('account', 'enrollpass', array('id' => $account->account_id));
 }
 return $pageMenu;
 ?>

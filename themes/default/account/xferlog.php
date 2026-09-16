@@ -11,7 +11,7 @@
 	<?php foreach ($incomingXfers as $xfer): ?>
 	<tr>
 		<td align="right"><?php echo number_format($xfer->amount) ?></td>
-		<td><?php echo htmlspecialchars($xfer->from_email) ?></td>
+		<td><?php echo htmlspecialchars($xfer->from_userid) ?></td>
 		<td><?php echo $this->formatDateTime($xfer->transfer_date) ?></td>
 	</tr>
 	<?php endforeach ?>

@@ -32,13 +32,14 @@ return array(
 			'cart'     => AccountLevel::NORMAL,
 			'changepass' => AccountLevel::NORMAL,
 			'edit'       => AccountLevel::ADMIN,
+			'enrollpass' => AccountLevel::ADMIN,
 			'changesex'  => AccountLevel::NORMAL,
-			'confirm'    => AccountLevel::UNAUTH,
-			'resend'     => AccountLevel::UNAUTH,
-			'resetpass'  => AccountLevel::UNAUTH,
-			'resetpw'    => AccountLevel::UNAUTH,
-			'changemail' => AccountLevel::NORMAL,
-			'confirmemail' => AccountLevel::NORMAL,
+			'confirm'    => AccountLevel::NOONE,
+			'resend'     => AccountLevel::NOONE,
+			'resetpass'  => AccountLevel::NOONE,
+			'resetpw'    => AccountLevel::NOONE,
+			'changemail' => AccountLevel::NOONE,
+			'confirmemail' => AccountLevel::NOONE,
 			'prune'        => AccountLevel::ANYONE
 		),
 		'character'	=> array(
@@ -114,7 +115,7 @@ return array(
 			'login'			=> AccountLevel::ADMIN,
 			'resetpass'		=> AccountLevel::ADMIN,
 			'changepass'	=> AccountLevel::ADMIN,
-			'changemail'	=> AccountLevel::ADMIN,
+			'changemail'	=> AccountLevel::NOONE,
 			'ban'			=> AccountLevel::ADMIN,
 			'ipban'			=> AccountLevel::ADMIN,
 			'txnview'		=> AccountLevel::ADMIN			
@@ -149,7 +150,7 @@ return array(
 			'index'			=> AccountLevel::NORMAL,
 			'cplogin'		=> AccountLevel::NORMAL,
 			'gamelogin'		=> AccountLevel::NORMAL,
-			'emailchange'	=> AccountLevel::NORMAL,
+			'emailchange'	=> AccountLevel::NOONE,
 			'passchange'	=> AccountLevel::NORMAL,
 			'passreset'		=> AccountLevel::NORMAL
 		),
