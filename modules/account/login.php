@@ -16,6 +16,20 @@ if (count($_POST)) {
 	$code     = $params->get('security_code');
 	
 	try {
+		$loginAthenaGroup = Flux::getServerGroupByName($serverGroupName);
+		if ($loginAthenaGroup) {
+			$remoteAddress = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'unknown';
+			$windowStart = date('Y-m-d H:i:s', time() - 900);
+			$sql = "SELECT COUNT(*) AS failures FROM {$loginAthenaGroup->loginDatabase}.$loginLogTable ";
+			$sql .= "WHERE ip = ? AND error_code IS NOT NULL AND login_date >= ?";
+			$sth = $loginAthenaGroup->connection->getStatement($sql);
+			$sth->execute(array($remoteAddress, $windowStart));
+			$failures = $sth->fetch();
+			if ($failures && (int)$failures->failures >= 10) {
+				throw new Flux_LoginError('Login rate limit exceeded', Flux_LoginError::RATE_LIMITED);
+			}
+		}
+
 		$session->login($serverGroupName, $username, $password, $code);
 		$returnURL = $params->get('return_url');
 		
@@ -37,30 +51,28 @@ if (count($_POST)) {
 	catch (Flux_LoginError $e) {
 		if ($username && $password && $e->getCode() != Flux_LoginError::INVALID_SERVER) {
 			$loginAthenaGroup = Flux::getServerGroupByName($serverGroupName);
-
-			$sql = "SELECT account_id FROM {$loginAthenaGroup->loginDatabase}.login WHERE ";
-			
-			if (!$loginAthenaGroup->loginServer->config->getNoCase()) {
-				$sql .= "CAST(userid AS BINARY) ";
-			} else {
-				$sql .= "userid ";
-			}
-			
-			$sql .= "= ? LIMIT 1";
-			$sth = $loginAthenaGroup->connection->getStatement($sql);
-			$sth->execute(array($username));
-			$row = $sth->fetch();
-
-			if ($row) {
-				$accountID = $row->account_id;
-				
-				$password = $loginAthenaGroup->loginServer->password->auditValue();
+			if ($loginAthenaGroup) {
+				$sql = "SELECT account_id FROM {$loginAthenaGroup->loginDatabase}.login WHERE ";
+				if (!$loginAthenaGroup->loginServer->config->getNoCase()) {
+					$sql .= "CAST(userid AS BINARY) ";
+				}
+				else {
+					$sql .= "userid ";
+				}
+				$sql .= "= ? LIMIT 1";
+				$sth = $loginAthenaGroup->connection->getStatement($sql);
+				$sth->execute(array($username));
+				$row = $sth->fetch();
+				$accountID = $row ? $row->account_id : null;
+				$auditUsername = substr((string)$username, 0, 23);
+				$auditValue = $loginAthenaGroup->loginServer->password->auditValue();
+				$remoteAddress = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'unknown';
 
 				$sql  = "INSERT INTO {$loginAthenaGroup->loginDatabase}.$loginLogTable ";
 				$sql .= "(account_id, username, password, ip, error_code, login_date) ";
 				$sql .= "VALUES (?, ?, ?, ?, ?, NOW())";
 				$sth  = $loginAthenaGroup->connection->getStatement($sql);
-				$sth->execute(array($accountID, $username, $password, $_SERVER['REMOTE_ADDR'], $e->getCode()));
+				$sth->execute(array($accountID, $auditUsername, $auditValue, $remoteAddress, $e->getCode()));
 			}
 		}
 		
@@ -88,6 +100,9 @@ if (count($_POST)) {
 				break;
 			case Flux_LoginError::PENDING_CONFIRMATION:
 				$errorMessage = Flux::message('PendingConfirmation');
+				break;
+			case Flux_LoginError::RATE_LIMITED:
+				$errorMessage = 'Too many failed login attempts. Try again in 15 minutes.';
 				break;
 			default:
 				$errorMessage = Flux::message('CriticalLoginError');

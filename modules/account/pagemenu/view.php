@@ -5,6 +5,9 @@
 $groups  = AccountLevel::getArray();
 
 $pageMenu = array();
+if ($account->account_id == $session->account->account_id && $auth->actionAllowed('account', 'changemail')) {
+	$pageMenu['Change Email'] = $this->url('account', 'changemail');
+}
 $canManageAccount = AccountLevel::getGroupLevel($account->group_id) <= $session->account->group_level || $auth->allowedToEditHigherPower;
 if ($canManageAccount && $auth->actionAllowed('account', 'edit')) {
 	$pageMenu[Flux::message('ModifyAccountLink')] = $this->url('account', 'edit', array('id' => $account->account_id));

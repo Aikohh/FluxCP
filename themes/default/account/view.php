@@ -21,6 +21,10 @@
 		</td>
 	</tr>
 	<tr>
+		<th><?php echo htmlspecialchars(Flux::message('AccountEmailLabel')) ?></th>
+		<td colspan="3"><?php echo htmlspecialchars($account->email) ?></td>
+	</tr>
+	<tr>
 		<th><?php echo htmlspecialchars(Flux::message('AccountGroupIDLabel')) ?></th>
 		<td colspan="3"><?php echo (int)$account->group_id ?></td>
 	</tr>

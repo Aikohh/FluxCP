@@ -9,12 +9,13 @@ Flux Control Panel (FluxCP) for rAthena servers.
 
 Requirements
 ---------
-* PHP 7.3 or newer
+* PHP 8.1 or newer
 * PDO and PDO-MYSQL extensions for PHP (including PHP_MYSQL support)
 * MySQL 5 or newer
 * Optional: GD2 (for guild emblems and registration CAPTCHA)
 * Optional: Tidy (for cleaner HTML output)
 * Optional: mod_rewrite support for UseCleanUrls feature
+* Optional: authenticated SMTP for email confirmation and password/PIN recovery
 * Optional: [Item images](http://rathena.org/board/files/file/2509-item-images/)
 
 
@@ -40,7 +41,7 @@ How To ... ?
 We have a small doc library that covers:
 * Basic User Documentation
     - Installation
-    - [rAthena Argon2id password compatibility](doc/passwords.md)
+    - [rAthena Argon2id password compatibility and recovery tokens](doc/passwords.md)
     - [Themes](https://github.com/rathena/FluxCP/blob/master/doc/user_theme.md)
     - [Languages](https://github.com/rathena/FluxCP/blob/master/doc/user_lang.md)
     - Installing Addons

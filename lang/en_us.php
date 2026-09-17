@@ -265,6 +265,7 @@ return array(
 	'ResendButton'            => 'Resend Confirmation E-mail',
 	// - account/resetpass
 	'ResetPassTitle'          => 'Reset Password',
+	'ResetPinTitle'           => 'Reset PIN',
 	'ResetPassEnterAccount'   => 'Please enter your account username.',
 	'ResetPassEnterEmail'     => 'Please enter your e-mail address.',
 	'ResetPassDisallowed'     => 'Password recovery cannot be used for this account.',

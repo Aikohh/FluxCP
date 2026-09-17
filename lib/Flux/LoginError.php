@@ -10,5 +10,6 @@ class Flux_LoginError extends Flux_Error {
 	const IPBANNED       = 5;
 	const INVALID_SECURITY_CODE = 6;
 	const PENDING_CONFIRMATION  = 7;
+	const RATE_LIMITED          = 8;
 }
 ?>

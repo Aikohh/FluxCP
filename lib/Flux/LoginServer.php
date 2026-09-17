@@ -121,11 +121,10 @@ class Flux_LoginServer extends Flux_BaseServer {
 	/**
 	 *
 	 */
-	public function register($username, $password, $confirmPassword, $gender, $birthdate, $securityCode)
+	public function register($username, $password, $confirmPassword, $email, $email2, $gender, $birthdate, $securityCode)
 	{
-		// rAthena requires a non-empty database value, but Raisupati does not
-		// collect or use player e-mail addresses.
-		$email = 'a@a.com';
+		$email = strtolower(trim($email));
+		$email2 = strtolower(trim($email2));
 
 		if (preg_match('/[^' . Flux::config('UsernameAllowedChars') . ']/', $username)) {
 			throw new Flux_RegisterError('Invalid character(s) used in username', Flux_RegisterError::INVALID_USERNAME);
@@ -163,6 +162,12 @@ class Flux_LoginServer extends Flux_BaseServer {
 		elseif (Flux::config('PasswordMinSymbol') > 0 && preg_match_all('/[^A-Za-z0-9]/', $password, $matches) < Flux::config('PasswordMinSymbol')) {
 			throw new Flux_RegisterError('Passwords must contain at least ' . intval(Flux::config('PasswordMinSymbol')) . ' symbol(s)', Flux_RegisterError::PASSWORD_NEED_SYMBOL);
 		}
+		elseif (strlen($email) > 39 || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+			throw new Flux_RegisterError('Invalid email address', Flux_RegisterError::INVALID_EMAIL_ADDRESS);
+		}
+		elseif ($email !== $email2) {
+			throw new Flux_RegisterError('Email addresses do not match', Flux_RegisterError::INVALID_EMAIL_CONF);
+		}
 		elseif (!in_array(strtoupper($gender), array('M', 'F'))) {
 			throw new Flux_RegisterError('Invalid gender', Flux_RegisterError::INVALID_GENDER);
 		}
@@ -199,16 +204,38 @@ class Flux_LoginServer extends Flux_BaseServer {
 		if ($res) {
 			throw new Flux_RegisterError('Username is already taken', Flux_RegisterError::USERNAME_ALREADY_TAKEN);
 		}
-		
+
+		if (!Flux::config('AllowDuplicateEmails')) {
+			$sql = "SELECT account_id FROM {$this->loginDatabase}.login WHERE LOWER(email) = LOWER(?) LIMIT 1";
+			$sth = $this->connection->getStatement($sql);
+			$sth->execute(array($email));
+			if ($sth->fetch()) {
+				throw new Flux_RegisterError('Email address is already in use', Flux_RegisterError::EMAIL_ADDRESS_IN_USE);
+			}
+		}
+
+		$createTable = Flux::config('FluxTables.AccountCreateTable');
+		$remoteAddress = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'unknown';
+		$windowStart = date('Y-m-d H:i:s', time() - 86400);
+		$sql = "SELECT COUNT(*) AS registrations FROM {$this->loginDatabase}.{$createTable} ";
+		$sql .= "WHERE reg_ip = ? AND reg_date >= ?";
+		$sth = $this->connection->getStatement($sql);
+		$sth->execute(array($remoteAddress, $windowStart));
+		$registrations = $sth->fetch();
+		if ($registrations && (int)$registrations->registrations >= 3) {
+			throw new Flux_RegisterError('Registration rate limit exceeded', Flux_RegisterError::RATE_LIMITED);
+		}
+
 		list($passwordHash, $passwordType) = $this->password->hash($password);
 		$birthdate = date('Y-m-d', $birthdatestamp);
+		$initialState = Flux::config('RequireEmailConfirm') ? 5 : 0;
 		if ($this->password->usesArgon2id()) {
-			$sql = "INSERT INTO {$this->loginDatabase}.login (userid, user_pass, passwd_type, email, sex, group_id, birthdate) VALUES (?, ?, ?, ?, ?, ?, ?)";
-			$bind = array($username, $passwordHash, $passwordType, $email, $gender, (int)$this->config->getGroupID(), $birthdate);
+			$sql = "INSERT INTO {$this->loginDatabase}.login (userid, user_pass, passwd_type, email, sex, group_id, birthdate, state) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+			$bind = array($username, $passwordHash, $passwordType, $email, $gender, (int)$this->config->getGroupID(), $birthdate, $initialState);
 		}
 		else {
-			$sql = "INSERT INTO {$this->loginDatabase}.login (userid, user_pass, email, sex, group_id, birthdate) VALUES (?, ?, ?, ?, ?, ?)";
-			$bind = array($username, $passwordHash, $email, $gender, (int)$this->config->getGroupID(), $birthdate);
+			$sql = "INSERT INTO {$this->loginDatabase}.login (userid, user_pass, email, sex, group_id, birthdate, state) VALUES (?, ?, ?, ?, ?, ?, ?)";
+			$bind = array($username, $passwordHash, $email, $gender, (int)$this->config->getGroupID(), $birthdate, $initialState);
 		}
 		$sth = $this->connection->getStatement($sql);
 		$res = $sth->execute($bind);
@@ -218,13 +245,12 @@ class Flux_LoginServer extends Flux_BaseServer {
 			$idsth->execute();
 			
 			$idres = $idsth->fetch();
-			$createTable = Flux::config('FluxTables.AccountCreateTable');
-			
+
 			$sql  = "INSERT INTO {$this->loginDatabase}.{$createTable} (account_id, userid, user_pass, sex, email, reg_date, reg_ip, confirmed) ";
 			$sql .= "VALUES (?, ?, ?, ?, ?, NOW(), ?, 1)";
 			$sth  = $this->connection->getStatement($sql);
 			
-			$sth->execute(array($idres->account_id, $username, $this->password->auditValue(), $gender, $email, $_SERVER['REMOTE_ADDR']));
+			$sth->execute(array($idres->account_id, $username, $this->password->auditValue(), $gender, $email, $remoteAddress));
 			return $idres->account_id;
 		}
 		else {

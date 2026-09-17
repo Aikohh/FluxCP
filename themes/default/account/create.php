@@ -1,6 +1,9 @@
 <?php if (!defined('FLUX_ROOT')) exit; ?>
 <h2><?php echo htmlspecialchars(Flux::message('AccountCreateHeading')) ?></h2>
 <p><?php printf(htmlspecialchars(Flux::message('AccountCreateInfo')), '<a href="'.$this->url('service', 'tos').'">'.Flux::message('AccountCreateTerms').'</a>') ?></p>
+<?php if (Flux::config('RequireEmailConfirm')): ?>
+<p><strong>Note:</strong> You will need to provide a working e-mail address to confirm your account before you can log-in.</p>
+<?php endif ?>
 <p><strong>Note:</strong> <?php echo sprintf("Your password must be between %d and %d characters.", Flux::config('MinPasswordLength'), Flux::config('MaxPasswordLength')) ?></p>
 <?php if (Flux::config('PasswordMinUpper') > 0): ?>
 <p><strong>Note:</strong> <?php echo sprintf(Flux::message('PasswordNeedUpper'), Flux::config('PasswordMinUpper')) ?></p>
@@ -51,6 +54,16 @@
 		<tr>
 			<th><label for="register_confirm_password"><?php echo htmlspecialchars(Flux::message('AccountPassConfirmLabel')) ?></label></th>
 			<td><input type="password" name="confirm_password" id="register_confirm_password" /></td>
+		</tr>
+
+		<tr>
+			<th><label for="register_email_address"><?php echo htmlspecialchars(Flux::message('AccountEmailLabel')) ?></label></th>
+			<td><input type="email" name="email_address" id="register_email_address" maxlength="39" autocomplete="email" required value="<?php echo htmlspecialchars($params->get('email_address') ?: '') ?>" /></td>
+		</tr>
+
+		<tr>
+			<th><label for="register_email_address2"><?php echo htmlspecialchars(Flux::message('AccountEmailLabel2')) ?></label></th>
+			<td><input type="email" name="email_address2" id="register_email_address2" maxlength="39" autocomplete="email" required value="<?php echo htmlspecialchars($params->get('email_address2') ?: '') ?>" /></td>
 		</tr>
 
 		<tr>

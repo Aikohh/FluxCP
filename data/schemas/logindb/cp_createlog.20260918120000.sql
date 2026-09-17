@@ -1,0 +1,1 @@
+ALTER TABLE cp_createlog MODIFY COLUMN confirm_code VARCHAR(64) DEFAULT NULL;
