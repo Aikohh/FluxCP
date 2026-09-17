@@ -33,6 +33,7 @@ return array(
 			'changepass' => AccountLevel::NORMAL,
 			'edit'       => AccountLevel::ADMIN,
 			'enrollpass' => AccountLevel::ADMIN,
+			'resetpin'   => AccountLevel::ADMIN,
 			'changesex'  => AccountLevel::NORMAL,
 			'confirm'    => AccountLevel::NOONE,
 			'resend'     => AccountLevel::NOONE,

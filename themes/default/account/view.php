@@ -4,8 +4,8 @@
 <p class="red"><?php echo htmlspecialchars($errorMessage) ?></p>
 <?php endif ?>
 <?php if ($account): ?>
-<?php if (Flux::config('PincodeEnabled') && $session->account->pincode == NULL): ?>
-	<p class="red">There is no pincode set! Please login via the game client now to secure your account.</p>
+<?php if (Flux::config('PincodeEnabled') && (string)$account->pincode === ''): ?>
+	<p class="red">There is no PIN set for this account. The player must create one at the next game login.</p>
 <?php endif ?>
 <table class="vertical-table">
 	<tr>

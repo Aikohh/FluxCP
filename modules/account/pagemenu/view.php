@@ -12,5 +12,8 @@ if ($canManageAccount && $auth->actionAllowed('account', 'edit')) {
 if ($canManageAccount && $server->loginServer->password->usesPasswordEnrollment() && $auth->actionAllowed('account', 'enrollpass')) {
 	$pageMenu['Password Recovery'] = $this->url('account', 'enrollpass', array('id' => $account->account_id));
 }
+if ($canManageAccount && Flux::config('PincodeEnabled') && $auth->actionAllowed('account', 'resetpin')) {
+	$pageMenu['Reset PIN'] = $this->url('account', 'resetpin', array('id' => $account->account_id));
+}
 return $pageMenu;
 ?>
