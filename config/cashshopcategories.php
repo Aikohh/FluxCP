@@ -10,9 +10,9 @@ return array(
 	1 => 'Hot',
 	2 => 'Limited',
 	3 => 'Rental',
-	4 => 'Gear',
-	5 => 'Buff',
-	6 => 'Heal',
+	4 => 'Permanent',
+	5 => 'Scrolls',
+	6 => 'Consumables',
 	7 => 'Other',
 	8 => 'Sale'
 );
