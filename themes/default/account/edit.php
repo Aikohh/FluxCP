@@ -71,12 +71,14 @@
 					<?php echo $this->dateTimeField('lastlogin', $account->lastlogin) ?>
 				</td>
 			</tr>
+			<?php if (!Flux::config('AllPlayersVIP')): ?>
 			<tr>
 				<th><label for="use_vip_time"><?php echo htmlspecialchars(Flux::message('VIPTimeDateLabel')) ?></label></th>
 				<td colspan="3">
 					You will need to login via the client to change the VIP time.
 				</td>
 			</tr>
+			<?php endif ?>
 			<tr>
 				<th><label for="last_ip"><?php echo htmlspecialchars(Flux::message('LastUsedIpLabel')) ?></label></th>
 				<td colspan="3"><input type="text" name="last_ip" id="last_ip" value="<?php echo htmlspecialchars($account->last_ip) ?>" /></td>
